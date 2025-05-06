@@ -1,49 +1,43 @@
 // lib/screens/task_list_screen.dart
-import 'package:flutter/material.dart';
-import '../services/auth_service.dart';
 
-class TaskListScreen extends StatelessWidget {
+import 'package:flutter/material.dart';
+import '../services/api_service.dart';
+import 'add_task_screen.dart';
+import '../services/api_service.dart' as model;
+
+class TaskListScreen extends StatefulWidget {
   const TaskListScreen({Key? key}) : super(key: key);
 
   @override
+  _TaskListScreenState createState() => _TaskListScreenState();
+}
+
+class _TaskListScreenState extends State<TaskListScreen> {
+  List<model.Task> tasks = [];
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTasks();
+  }
+
+  Future<void> _loadTasks() async {
+    final all = await ApiService.fetchTasks();
+    setState(() {
+      tasks = all;
+      _loading = false;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final List<String> tasks = [];
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false, // remove default back button
-        title: const Text('Your Tasks'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () async {
-              final shouldSignOut = await showDialog<bool>(
-                context: context,
-                builder:
-                    (ctx) => AlertDialog(
-                      title: const Text('Confirm Sign Out'),
-                      content: const Text('Are you sure you want to sign out?'),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.of(ctx).pop(false),
-                          child: const Text('Cancel'),
-                        ),
-                        TextButton(
-                          onPressed: () => Navigator.of(ctx).pop(true),
-                          child: const Text('Sign Out'),
-                        ),
-                      ],
-                    ),
-              );
-              if (shouldSignOut == true) {
-                await AuthService().signOut();
-                Navigator.pushReplacementNamed(context, '/');
-              }
-            },
-          ),
-        ],
-      ),
+      appBar: AppBar(title: const Text('Your Tasks')),
       body:
-          tasks.isEmpty
+          _loading
+              ? const Center(child: CircularProgressIndicator())
+              : tasks.isEmpty
               ? const Center(
                 child: Text(
                   'No tasks yet.',
@@ -52,17 +46,34 @@ class TaskListScreen extends StatelessWidget {
               )
               : ListView.builder(
                 itemCount: tasks.length,
-                itemBuilder:
-                    (_, i) => ListTile(
-                      title: Text(
-                        tasks[i],
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                      trailing: Checkbox(value: false, onChanged: (_) {}),
+                itemBuilder: (_, i) {
+                  final t = tasks[i];
+                  return ListTile(
+                    title: Text(
+                      t.name,
+                      style: const TextStyle(color: Colors.white),
                     ),
+                    subtitle: Text(
+                      t.description,
+                      style: const TextStyle(color: Colors.white70),
+                    ),
+                    trailing: Text(
+                      '${t.date.month}/${t.date.day}/${t.date.year}',
+                      style: const TextStyle(color: Colors.white54),
+                    ),
+                  );
+                },
               ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.pushNamed(context, '/add'),
+        onPressed: () async {
+          final added = await Navigator.push<bool>(
+            context,
+            MaterialPageRoute(builder: (_) => const AddTaskScreen()),
+          );
+          if (added == true) {
+            _loadTasks();
+          }
+        },
         child: const Icon(Icons.add),
       ),
     );

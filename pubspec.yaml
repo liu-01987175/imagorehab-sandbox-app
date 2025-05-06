@@ -1,19 +1,31 @@
 name: task_tracker
-description: "A new Flutter project."
+description: "A Flutter project for tracking tasks with AWS Cognito auth and MongoDB storage"
 publish_to: 'none'
-version: 0.1.0
+version: 0.1.0+1
 
 environment:
-  sdk: ^3.7.2
+  sdk: ">=3.7.2 <4.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  # Added this for AWS cognito set up earlier
-    # Cognito SDK
+
+  http: ^0.13.0
+
+  # Database to store user created tasks
+  mongo_dart: ^0.10.5
+
+  # icons
+  cupertino_icons: ^1.0.2
+
+  # AWS Cognito
   amazon_cognito_identity_dart_2: ^3.8.1
-  # Secure storage for tokens
+
+  # Secure local storage (for tokens, etc.)
   flutter_secure_storage: ^8.0.0
+
+  # Google Sign-In (optional)
+  google_sign_in: ^5.4.0
 
 dev_dependencies:
   flutter_test:

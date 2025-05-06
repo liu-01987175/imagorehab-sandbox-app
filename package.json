@@ -1,0 +1,36 @@
+{
+  "name": "task_tracker",
+  "version": "1.0.0",
+  "description": "Simple full-stack application with login/signup and end to end data.",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "dependencies": {
+    "bson": "^6.10.3",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "memory-pager": "^1.5.0",
+    "mongodb": "^6.16.0",
+    "mongodb-connection-string-url": "^3.0.2",
+    "punycode": "^2.3.1",
+    "sparse-bitfield": "^3.0.3",
+    "tr46": "^5.1.1",
+    "webidl-conversions": "^7.0.0",
+    "whatwg-url": "^14.2.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liu-01987175/imagorehab-sandbox-app.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/liu-01987175/imagorehab-sandbox-app/issues"
+  },
+  "homepage": "https://github.com/liu-01987175/imagorehab-sandbox-app#readme"
+}

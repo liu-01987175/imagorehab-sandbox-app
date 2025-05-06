@@ -1,11 +1,8 @@
-import 'package:flutter/material.dart';
+// lib/screens/add_task_screen.dart
 
-/*
-  todo:
-  1. Get MongoDB working
-  2. Be able to store tasks
-  3. Fix size of input field (desktop)
- */
+import 'package:flutter/material.dart';
+import '../services/api_service.dart';
+import '../services/api_service.dart' as model;
 
 class AddTaskScreen extends StatefulWidget {
   const AddTaskScreen({Key? key}) : super(key: key);
@@ -15,42 +12,85 @@ class AddTaskScreen extends StatefulWidget {
 }
 
 class _AddTaskScreenState extends State<AddTaskScreen> {
-  final _titleController = TextEditingController();
+  final _nameController = TextEditingController();
+  final _descController = TextEditingController();
+  DateTime? _pickedDate;
 
   @override
   void dispose() {
-    _titleController.dispose();
+    _nameController.dispose();
+    _descController.dispose();
     super.dispose();
   }
 
-  void _saveTask() {
-    // TODO: save task to backend
-    Navigator.pop(context);
+  Future<void> _saveTask() async {
+    if (_nameController.text.isEmpty ||
+        _descController.text.isEmpty ||
+        _pickedDate == null)
+      return;
+
+    final task = model.Task(
+      name: _nameController.text,
+      description: _descController.text,
+      date: _pickedDate!,
+    );
+
+    await ApiService.addTask(task);
+    Navigator.of(context).pop(true);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('New Task')),
+      appBar: AppBar(title: const Text('Add Task')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextField(
-              controller: _titleController,
+              controller: _nameController,
               style: const TextStyle(color: Colors.white),
               decoration: const InputDecoration(
-                labelText: 'Task Title',
+                labelText: 'Name',
                 labelStyle: TextStyle(color: Colors.white70),
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.white30),
-                ),
-                focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.white),
-                ),
               ),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _descController,
+              style: const TextStyle(color: Colors.white),
+              decoration: const InputDecoration(
+                labelText: 'Description',
+                labelStyle: TextStyle(color: Colors.white70),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    _pickedDate == null
+                        ? 'No date chosen'
+                        : '${_pickedDate!.month}/${_pickedDate!.day}/${_pickedDate!.year}',
+                    style: const TextStyle(color: Colors.white70),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    final d = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime(2100),
+                    );
+                    if (d != null) setState(() => _pickedDate = d);
+                  },
+                  child: const Text('Pick Date'),
+                ),
+              ],
+            ),
+            const Spacer(),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
