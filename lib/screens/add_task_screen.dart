@@ -1,8 +1,12 @@
-// lib/screens/add_task_screen.dart
-
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import '../services/api_service.dart' as model;
+
+/*
+  todo:
+  1. Stylize adding tasks in a card format afte pressing a button
+  2. 
+ */
 
 class AddTaskScreen extends StatefulWidget {
   const AddTaskScreen({Key? key}) : super(key: key);

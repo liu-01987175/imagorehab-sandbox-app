@@ -5,18 +5,18 @@ class MongoService {
   static late final DbCollection tasksCollection;
 
   /// Initialize & open the connection.
-  /// Call this once at app startup (before any reads/writes).
+  /// Call this once at app startup
   static Future<void> init(String connectionString) async {
     _db = await Db.create(connectionString);
     await _db.open();
     tasksCollection = _db.collection('tasks');
   }
 
-  /// Fetch all tasks (as maps of name, description, date)
+  /// Fetch all tasks
   static Future<List<Map<String, dynamic>>> getAllTasks() =>
       tasksCollection.find().toList();
 
-  /// Insert one new task document
+  /// Insert one new task
   static Future<void> addTask({
     required String name,
     required String description,
@@ -29,6 +29,6 @@ class MongoService {
     });
   }
 
-  /// Optionally, close the DB when the app shuts down
+  /// Close the DB when the app shuts down
   static Future<void> close() async => _db.close();
 }

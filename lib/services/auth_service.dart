@@ -1,4 +1,3 @@
-// lib/services/auth_service.dart
 import 'package:amazon_cognito_identity_dart_2/cognito.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -45,7 +44,7 @@ class AuthService {
     return false;
   }
 
-  /// Registers a new user in AWS Cognito. Returns true if the user is confirmed.
+  /// Registers a new user in AWS Cognito
   Future<bool> signUp(String email, String password) async {
     try {
       final result = await _userPool.signUp(

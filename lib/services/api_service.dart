@@ -1,11 +1,13 @@
+// lib/services/
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-// simple Task model
 class Task {
   final String id;
-  final String name, description;
+  final String name;
+  final String description;
   final DateTime date;
+
   Task({
     this.id = '',
     required this.name,
@@ -13,12 +15,23 @@ class Task {
     required this.date,
   });
 
-  factory Task.fromJson(Map<String, dynamic> json) => Task(
-    id: json['_id']?['\$oid'] ?? json['_id']?.toString() ?? '',
-    name: json['name'],
-    description: json['description'],
-    date: DateTime.parse(json['date']),
-  );
+  factory Task.fromJson(Map<String, dynamic> json) {
+    // Handle both cases: plain string or { "$oid": "…" }
+    final rawId = json['_id'];
+    String parsedId;
+    if (rawId is Map && rawId.containsKey(r'$oid')) {
+      parsedId = rawId[r'$oid'] as String;
+    } else {
+      parsedId = rawId.toString();
+    }
+
+    return Task(
+      id: parsedId,
+      name: json['name'] as String,
+      description: json['description'] as String,
+      date: DateTime.parse(json['date'] as String),
+    );
+  }
 }
 
 class ApiService {
