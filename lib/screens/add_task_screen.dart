@@ -1,3 +1,5 @@
+// lib/screens/add_task_screen.dart
+
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import '../services/api_service.dart' as model;
@@ -5,7 +7,6 @@ import '../services/api_service.dart' as model;
 /*
   todo:
   1. Stylize adding tasks in a card format afte pressing a button
-  2. 
  */
 
 class AddTaskScreen extends StatefulWidget {
@@ -28,14 +29,12 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   }
 
   Future<void> _saveTask() async {
-    if (_nameController.text.isEmpty ||
-        _descController.text.isEmpty ||
-        _pickedDate == null)
-      return;
+    // only require name and date now; description may be empty
+    if (_nameController.text.isEmpty || _pickedDate == null) return;
 
     final task = model.Task(
       name: _nameController.text,
-      description: _descController.text,
+      description: _descController.text, // may be empty
       date: _pickedDate!,
     );
 
@@ -65,7 +64,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
               controller: _descController,
               style: const TextStyle(color: Colors.white),
               decoration: const InputDecoration(
-                labelText: 'Description',
+                labelText: 'Description (optional)',
                 labelStyle: TextStyle(color: Colors.white70),
               ),
             ),
