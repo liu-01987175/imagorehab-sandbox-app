@@ -5,7 +5,7 @@ import '../services/auth_service.dart';
   todo:
   1. After first login, add autofill for future attempts
   2. Implement Google sign in feature, working with AWS cognito
- */
+*/
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);

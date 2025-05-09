@@ -1,12 +1,11 @@
-// lib/screens/signup_screen.dart
-
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
+import 'confirm_code_screen.dart'; // import the confirm screen directly
 
 /*
   todo:
   1.
-*/
+ */
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({Key? key}) : super(key: key);
@@ -45,24 +44,31 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
     try {
       await AuthService().signUp(_emailCtrl.text.trim(), _passCtrl.text);
-      // no automatic resend here
-      Navigator.pushReplacementNamed(
-        context,
-        '/confirm',
-        arguments: {
-          'email': _emailCtrl.text.trim(),
-          'password': _passCtrl.text,
-        },
+      // bypass named routing: directly push ConfirmCodeScreen
+      // DO NOT REMOVE, this makes confirmation code screen work
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => const ConfirmCodeScreen(),
+          settings: RouteSettings(
+            arguments: {
+              'email': _emailCtrl.text.trim(),
+              'password': _passCtrl.text,
+            },
+          ),
+        ),
       );
     } on UsernameExistsException {
       // user exists but unconfirmed: just navigate
-      Navigator.pushReplacementNamed(
-        context,
-        '/confirm',
-        arguments: {
-          'email': _emailCtrl.text.trim(),
-          'password': _passCtrl.text,
-        },
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => const ConfirmCodeScreen(),
+          settings: RouteSettings(
+            arguments: {
+              'email': _emailCtrl.text.trim(),
+              'password': _passCtrl.text,
+            },
+          ),
+        ),
       );
     } catch (e) {
       setState(() => _error = 'Error: $e');
