@@ -1,3 +1,5 @@
+// lib/screens/task_list_screen.dart
+
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -100,6 +102,72 @@ class _TaskListScreenState extends State<TaskListScreen> {
     ApiService.deleteTask(task.id).catchError((_) {});
   }
 
+  void _showEditDialog(model.Task task) {
+    final nameCtrl = TextEditingController(text: task.name);
+    final descCtrl = TextEditingController(text: task.description);
+    DateTime pickedDate = task.date; // now non-nullable
+
+    showDialog(
+      context: context,
+      builder:
+          (ctx) => AlertDialog(
+            title: const Text('Edit Task'),
+            content: StatefulBuilder(
+              builder:
+                  (ctx, setState) => Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextField(
+                        controller: nameCtrl,
+                        decoration: const InputDecoration(labelText: 'Name'),
+                      ),
+                      TextField(
+                        controller: descCtrl,
+                        decoration: const InputDecoration(
+                          labelText: 'Description',
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () async {
+                          final d = await showDatePicker(
+                            context: ctx,
+                            initialDate: pickedDate,
+                            firstDate: DateTime(2000),
+                            lastDate: DateTime(2100),
+                          );
+                          if (d != null) setState(() => pickedDate = d);
+                        },
+                        child: Text(
+                          '${pickedDate.month}/${pickedDate.day}/${pickedDate.year}',
+                        ),
+                      ),
+                    ],
+                  ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  final updated = model.Task(
+                    id: task.id,
+                    name: nameCtrl.text,
+                    description: descCtrl.text,
+                    date: pickedDate, // now safe
+                  );
+                  await ApiService.updateTask(task.id, updated);
+                  Navigator.of(ctx).pop();
+                  _loadTasks();
+                },
+                child: const Text('Save'),
+              ),
+            ],
+          ),
+    );
+  }
+
   Future<void> _logout() async {
     await AuthService().signOut();
     Navigator.pushReplacementNamed(context, '/');
@@ -152,6 +220,11 @@ class _TaskListScreenState extends State<TaskListScreen> {
                     icon: const Icon(Icons.delete, color: Colors.redAccent),
                     tooltip: 'Delete',
                     onPressed: () => _deleteTask(t),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.edit, color: Colors.lightBlueAccent),
+                    tooltip: 'Edit',
+                    onPressed: () => _showEditDialog(t),
                   ),
                 ],
               ),
