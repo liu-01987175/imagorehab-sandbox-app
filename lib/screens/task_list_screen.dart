@@ -1,12 +1,9 @@
-// lib/screens/task_list_screen.dart
-
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:task_tracker/services/api_service.dart';
 import 'package:task_tracker/services/auth_service.dart';
 import 'add_task_screen.dart';
-import 'dart:convert';
-import '../services/api_service.dart';
-import 'package:http/http.dart' as http;
 import '../services/api_service.dart' as model;
 
 class TaskListScreen extends StatefulWidget {
@@ -43,43 +40,109 @@ class _TaskListScreenState extends State<TaskListScreen> {
     }
   } */
 
+  // Gets tasks from database
   Future<void> _loadTasks() async {
     const uri = 'http://localhost:3000/tasks';
     try {
-      // Log before the call
-      // ignore: avoid_print
-      print('→ FETCHING tasks from $uri');
-
       final response = await http.get(Uri.parse(uri));
-
-      // Log status & body
-      // ignore: avoid_print
-      print('← RESPONSE ${response.statusCode}: ${response.body}');
-
-      if (response.statusCode != 200) {
+      if (response.statusCode != 200)
         throw Exception('HTTP ${response.statusCode}');
-      }
-
       final List data = jsonDecode(response.body);
       final all =
-          data.map((e) => Task.fromJson(e)).toList()
+          data.map((e) => model.Task.fromJson(e)).toList()
             ..sort((a, b) => a.date.compareTo(b.date));
-
       setState(() {
         tasks = all;
         _loading = false;
         _error = null;
       });
-    } catch (e, st) {
-      // Log the full error & stack
-      // ignore: avoid_print
-      print('Error fetching tasks: $e\n$st');
-
+    } catch (e) {
       setState(() {
-        _error = 'Failed to load tasks:\n$e';
+        _error = 'Failed to load tasks';
         _loading = false;
       });
     }
+  }
+
+  Future<void> _deleteTask(String id) async {
+    try {
+      await ApiService.deleteTask(id);
+      // remove locally after successful delete
+      setState(() => tasks.removeWhere((t) => t.id == id));
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Delete failed: $e')));
+    }
+  }
+
+  // Show edit dialog for a task
+  void _showEditDialog(model.Task task) {
+    final nameCtrl = TextEditingController(text: task.name);
+    final descCtrl = TextEditingController(text: task.description);
+    DateTime? pickedDate = task.date;
+
+    showDialog(
+      context: context,
+      builder:
+          (dialogContext) => AlertDialog(
+            title: const Text('Edit Task'),
+            content: StatefulBuilder(
+              builder:
+                  (ctx, setState) => Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextField(
+                        controller: nameCtrl,
+                        decoration: const InputDecoration(labelText: 'Name'),
+                      ),
+                      TextField(
+                        controller: descCtrl,
+                        decoration: const InputDecoration(
+                          labelText: 'Description',
+                        ),
+                      ),
+                      TextButton(
+                        child: Text(
+                          pickedDate == null
+                              ? 'No date chosen'
+                              : '${pickedDate!.month}/${pickedDate!.day}/${pickedDate!.year}',
+                        ),
+                        onPressed: () async {
+                          final d = await showDatePicker(
+                            context: dialogContext,
+                            initialDate: pickedDate!,
+                            firstDate: DateTime(2000),
+                            lastDate: DateTime(2100),
+                          );
+                          if (d != null) setState(() => pickedDate = d);
+                        },
+                      ),
+                    ],
+                  ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  final updated = model.Task(
+                    id: task.id,
+                    name: nameCtrl.text,
+                    description: descCtrl.text,
+                    date: pickedDate!,
+                  );
+                  await ApiService.updateTask(task.id, updated);
+                  Navigator.of(dialogContext).pop();
+                  _loadTasks(); // refresh list
+                },
+                child: const Text('Save'),
+              ),
+            ],
+          ),
+    );
   }
 
   Future<void> _logout() async {
@@ -118,9 +181,24 @@ class _TaskListScreenState extends State<TaskListScreen> {
             ),
             child: ListTile(
               title: Text(t.name, style: const TextStyle(color: Colors.white)),
-              trailing: Text(
-                formattedDate,
-                style: const TextStyle(color: Colors.white54),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    formattedDate,
+                    style: const TextStyle(color: Colors.white54),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.check, color: Colors.greenAccent),
+                    tooltip: 'Complete (delete)',
+                    onPressed: () => _deleteTask(t.id),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.edit, color: Colors.lightBlueAccent),
+                    tooltip: 'Edit Task',
+                    onPressed: () => _showEditDialog(t),
+                  ),
+                ],
               ),
             ),
           );
