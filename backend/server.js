@@ -1,12 +1,9 @@
-// backend/server.js
-
 const express = require('express');
 const cors = require('cors');
 
 /*
   todo:
-  1. implement check off(delete) a task
-  2. implement edit (update) a task
+  1. implement edit (update) a task
 */
 
 const { MongoClient, ObjectId } = require('mongodb');

@@ -82,7 +82,7 @@ class ApiService {
         'date': t.date.toIso8601String(),
       }),
     );
-    // ignore: avoid_print
+    //
     print('PUT $uri → ${resp.statusCode}: ${resp.body}');
     if (resp.statusCode != 200) throw Exception('Failed to update task');
   }

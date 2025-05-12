@@ -1,18 +1,22 @@
 import 'package:mongo_dart/mongo_dart.dart';
 
+/*
+  todo:
+  1. 
+ */
+
 class MongoService {
   static late final Db _db;
   static late final DbCollection tasksCollection;
 
-  /// Initialize & open the connection.
-  /// Call this once at app startup
+  /// Initializes & open the connection.
   static Future<void> init(String connectionString) async {
     _db = await Db.create(connectionString);
     await _db.open();
     tasksCollection = _db.collection('tasks');
   }
 
-  /// Fetch all tasks
+  /// Fetchss all the tasks in databse
   static Future<List<Map<String, dynamic>>> getAllTasks() =>
       tasksCollection.find().toList();
 
@@ -29,6 +33,6 @@ class MongoService {
     });
   }
 
-  /// Close the DB when the app shuts down
+  /// Closes the database when app closes
   static Future<void> close() async => _db.close();
 }
